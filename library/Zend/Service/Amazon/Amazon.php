@@ -56,7 +56,7 @@ class Amazon
      *
      * @var string
      */
-    public $version = '2005-10-05';
+    protected static $version = '2005-10-05';
 
     /**
      * @var string
@@ -207,20 +207,6 @@ class Amazon
     }
 
     /**
-     * Set the Amazon Web Services version
-     *
-     * e.g. '2005-10-05'
-     *
-     * @param string $version
-     * @return Amazon
-     */
-    public function setVersion($version)
-    {
-        $this->version = (string) $version;
-        return $this;
-    }
-
-    /**
      * Prepare options for request
      *
      * @param  string $query          Action to perform
@@ -233,7 +219,7 @@ class Amazon
         $options['AWSAccessKeyId'] = $this->appId;
         $options['Service']        = 'AWSECommerceService';
         $options['Operation']      = (string) $query;
-        $options['Version']        = $this->version;
+        $options['Version']        = self::$version;
 
         // de-canonicalize out sort key
         if (isset($options['ResponseGroup'])) {
@@ -294,6 +280,31 @@ class Amazon
     }
 
     /**
+     * Set the Amazon Web Services version
+     *
+     * e.g. '2005-10-05'
+     *
+     * @static
+     * @param string $version
+     * @return Amazon
+     */
+    static public function setVersion($version)
+    {
+        self::$version = (string) $version;
+    }
+
+    /**
+     * Get the Amazon Web Services Version being used
+     *
+     * @static
+     * @return string
+     */
+    static public function getVersion()
+    {
+        return self::$version;
+    }
+
+    /**
      * Check result for errors
      *
      * @param  \DOMDocument $dom
@@ -304,7 +315,7 @@ class Amazon
     protected function checkErrors(\DOMDocument $dom)
     {
         $xpath = new \DOMXPath($dom);
-        $xpath->registerNamespace('az', 'http://webservices.amazon.com/AWSECommerceService/' . $this->version);
+        $xpath->registerNamespace('az', 'http://webservices.amazon.com/AWSECommerceService/' . self::$version);
 
         if ($xpath->query('//az:Error')->length >= 1) {
             $code = $xpath->query('//az:Error/az:Code/text()')->item(0)->data;
